@@ -10,7 +10,7 @@
   "toggleTheme": {
     "message": "테마 변경"
   },
-  "injectButton": {
+  "callPet": {
     "message": "콘텐츠 스크립트를 삽입하려면 클릭하세요."
   },
   "greeting": {

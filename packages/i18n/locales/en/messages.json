@@ -10,8 +10,8 @@
   "toggleTheme": {
     "message": "Toggle theme"
   },
-  "injectButton": {
-    "message": "Click to inject Content Scripts"
+  "callPet": {
+    "message": "Whistle for Pet"
   },
   "greeting": {
     "description": "Greeting message",
