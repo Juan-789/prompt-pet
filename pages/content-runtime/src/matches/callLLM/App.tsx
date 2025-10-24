@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 
 interface LLMResponse {
-  "hello from LLM": string;
+  "message": string;
 }
 
 async function betterPrompt(initPrompt: string): Promise<LLMResponse | undefined>{ //return string
-  const url: string = "http://127.0.0.1:8000/";
+  const url: string = "http://127.0.0.1:5000/";
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -37,7 +37,7 @@ export default function App() {
   if (loading) {
     return <div className="ceb-fourth-runtime-content-view-text">loading newPrompt</div>;
   }
-  const displayContent = data?.['hello from LLM'] ?? "nothing unfortunately";
+  const displayContent = data?.['message'] ?? "nothing unfortunately";
 
   return (
     <div className="ceb-fourth-runtime-content-view-text">

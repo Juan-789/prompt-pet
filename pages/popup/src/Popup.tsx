@@ -13,6 +13,13 @@ const notificationOptions = {
   message: 'You cannot inject script here!',
 } as const;
 
+function readPromptBoxGemini() {  //returns contents of the gemini promptbox string
+  const selector = 'div.ql-editor.textarea.new-input-ui[role="textbox"]';
+  const targetElement = document.querySelector(selector);
+  console.log(targetElement?.textContent);
+  return targetElement?.textContent;
+}
+
 const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
@@ -22,9 +29,6 @@ const Popup = () => {
 
   const [promptArea, setPromptArea] = useState(defaultPrompt);
   const [readStatus, setReadStatus] = useState('Initializing...');
-  // const [fetchStatus, setFetchStatus] = useState('');
-  // const [isLoading, setIsLoading] = useState(false);
-  // const [currTab, setTab] = useState(0);
 
   const scrapingScripts = async () => { //this should be like sub-script? idk what to call it but the name is descriptive ig
     setReadStatus('Attempting to read active tab DOM...');
@@ -34,10 +38,8 @@ const Popup = () => {
       return; // Exit if the required API is missing
     }
     try{
-      console.log("inside try of popup");
       const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
       if (tab?.id) {
-        // setTab(tab.id);
         const results = await chrome.scripting.executeScript({
           target: {tabId: tab.id},
           func: readPromptBoxGemini,
@@ -46,7 +48,33 @@ const Popup = () => {
         const readContent = results?.[0]?.result;
 
         if (readContent && readContent.length > 0) {  //maybe here i send an arg or param to another widget
-          setPromptArea(readContent);
+          // embed here function call to llm
+            const url: string = "http://127.0.0.1:5000/fix";
+            try {
+              const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  prompt: readContent
+                })
+              });
+              if (!response.ok) {
+                throw new Error(`Backend is cooked ${response.status}`);
+              }
+              const result = await response.json();
+              const improvedPrompt = result?.['message'] ?? "failed inside try";
+              console.log("improved prompt", improvedPrompt);
+
+              setPromptArea(improvedPrompt);
+              setReadStatus(`Succesfully improved (${improvedPrompt} chars)`);
+              return improvedPrompt;
+            } catch (e) {
+              console.error(`shi got cooked twin in the callLLM betterPrompt func ${e}`);
+              return undefined;
+            }
+          
           setReadStatus(`content succesfuly read (${readContent.length}) chars`)
           // chrome.tabs.sendMessage(chrome.tabs.query({active}))
         } else if (readContent === "") {
@@ -66,9 +94,6 @@ const Popup = () => {
     }
   };
 
-  const sendUserPromptToBackend = async () => {
-    
-  };
 
   const injectContentScript = async () => {
     //this to inject stuff in react
@@ -97,7 +122,7 @@ const Popup = () => {
       });
   };
 
-  const sendPromptToTextArea = async (promptToSend) => {
+  const sendPromptToTextArea = async (promptToSend: string) => {
     const [tab] = await chrome.tabs.query({ currentWindow: true, active: true});
     chrome.tabs.sendMessage(tab.id, {
       action: 'USER_PROMPT',
@@ -109,9 +134,11 @@ const Popup = () => {
 
   const getAll3exec = async () => {
     await injectContentScript();
-    await scrapingScripts();
-    const final_promnt = promptArea;
-    await sendPromptToTextArea(final_promnt);
+    const new_prompt = await scrapingScripts();
+    console.log("inside 3 execs", new_prompt);
+    if (new_prompt) {
+      await sendPromptToTextArea(new_prompt);
+    }
   };
 
 
@@ -144,11 +171,5 @@ const Popup = () => {
     </div>
   );
 };
-function readPromptBoxGemini() {  //returns contents of the gemini promptbox string
-  const selector = 'div.ql-editor.textarea.new-input-ui[role="textbox"]';
-  const targetElement = document.querySelector(selector);
-  console.log(targetElement?.textContent);
-  return targetElement?.textContent;
-}
 
 export default withErrorBoundary(withSuspense(Popup, <LoadingSpinner />), ErrorDisplay);
