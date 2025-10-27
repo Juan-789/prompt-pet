@@ -11,6 +11,33 @@ export default function App() {
     setPromptArea(e.target.value);
   };
 
+  const injectIntoGemini = () => {
+    const selector = 'div.ql-editor.textarea.new-input-ui[role="textbox"]';
+    const targetElement = document.querySelector(selector);
+    if (targetElement) {
+      // Set the text content
+      targetElement.textContent = promptArea;
+      
+      // Trigger input event so Gemini recognizes the change
+      targetElement.dispatchEvent(new Event('input', { bubbles: true }));
+      targetElement.dispatchEvent(new Event('change', { bubbles: true }));
+      
+      // Focus the element
+      targetElement.focus();
+      
+      console.log("Successfully injected prompt into Gemini!");
+      return true;
+    } else {
+      console.error("Gemini prompt box not found!");
+      return false;
+    }
+  };
+
+  const handleYesClick = () => {
+    console.log("Yes clicked, injecting:", promptArea);
+    injectIntoGemini();
+  };
+
 
   const messageHandler = useCallback((msg, sender, sendResponse) => {
       if (msg.action === 'USER_PROMPT') {
@@ -43,7 +70,7 @@ export default function App() {
             style={{ 
               backgroundColor: '#ece9d8' 
             }}
-            // onClick={}
+            onClick={handleYesClick}  //send the prompt to the actual main textbox
             >
               Yes
           </button>
