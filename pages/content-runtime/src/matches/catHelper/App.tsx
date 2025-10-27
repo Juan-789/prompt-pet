@@ -6,9 +6,10 @@ export default function App() {
   const [promptArea, setPromptArea] = useState(defaultPrompt);
   const [petPosition, setPetPosition] = useState({
     x: window.innerWidth - 200,
-    y: window.innerHeight - 200/2
+    y: (window.innerHeight - 200)/2
   });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [velocity, setVelocity] = useState({ x:-2, y: -1.5});
   const clippyUrl = chrome.runtime.getURL('clippy.png');
 
   const handlePromptChange = (e) =>{
@@ -55,28 +56,48 @@ export default function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       setPetPosition(prev => {
-        const newX =  prev.x - 2;
-        const newY =  prev.y - 1;
-
         const containerWidth = containerRef.current?.offsetWidth || 400;
         const containerHeight = containerRef.current?.offsetHeight || 300;
 
-        const minX = window.innerWidth - containerWidth + 180;
-        const minY = 20;
-        const maxY = window.innerWidth - containerWidth;
+        const minX = 180;
+        const maxX = window.innerWidth;
+        const minY = 0;
+        const maxY = window.innerHeight;
 
-        if (newX <= minX || newY <= minY) {
-          clearInterval(interval);
-          return {
-            x: Math.max(newX, minX),
-            y: Math.max(newY, minY),
-          };
+        let newX =  prev.x + velocity.x;
+        let newY =  prev.y + velocity.y;
+        let newVelocityX = velocity.x;
+        let newVelocityY = velocity.y;
+
+        if (newX <= minX || newX >= maxX){
+          newVelocityX = -velocity.x;
+          // newX = newX < minX ? minX : maxX; //this could be wrong
+          if (newX<=minX) {
+            newX = minX;
+          } else {
+            newX = maxX;
+          }
         }
+          
+        if (newY <= minY || newY >= maxY) {
+          newVelocityY = -velocity.y;
+          if (newY<=minY) {
+            newY = minY;
+          } else {
+            newY = maxY;
+          }
+        }
+          
+        if (newVelocityX !== velocity.x || newVelocityY !== velocity.y) {
+          setVelocity({ x: newVelocityX, y: newVelocityY});
+        }
+
         return {x: newX, y: newY};
       });
     }, 50);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [velocity]);
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(messageHandler);
