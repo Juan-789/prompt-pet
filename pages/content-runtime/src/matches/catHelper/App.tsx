@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 export default function App() {
-  const defaultPrompt = "sample cat prompt with suggestion to make it better";
+  const defaultPrompt = "app func";
 
   const [promptArea, setPromptArea] = useState(defaultPrompt);
   const [petPosition, setPetPosition] = useState({
@@ -10,11 +10,18 @@ export default function App() {
   });
   const containerRef = useRef<HTMLDivElement>(null);
   const [velocity, setVelocity] = useState({ x:-2, y: -1.5});
+  // const [velocity, setVelocity] = useState({ x:0, y: 0});
+
   const clippyUrl = chrome.runtime.getURL('clippy.png');
 
   const handlePromptChange = (e) =>{
     setPromptArea(e.target.value);
   };
+
+  const handlePetClick = () => {
+    setPromptArea("let go of me you fucking chud");
+    console.log("let go of me you fucking chud");
+  }
 
   const injectIntoGemini = () => {
     const selector = 'div.ql-editor.textarea.new-input-ui[role="textbox"]';
@@ -106,8 +113,26 @@ export default function App() {
     };
   }, [messageHandler]);
 
-
-  return (  //so at some point the insert button on the popup should trigger a response from backend, which will in turn get into this textbox  
+{/* <textarea
+          className="w-full min-h-32 p-3 bg-white text-black rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-teal-400 border-black"
+          value={promptArea}
+          onChange={handlePromptChange}
+        /> */}
+  // <button className="px-4 py-1 border-2 border-gray-500 text-black text-sm"
+  //           style={{ 
+  //             backgroundColor: '#ece9d8' 
+  //           }}
+  //           onClick={handleYesClick}  //send the prompt to the actual main textbox
+  //           >
+  //             Yes
+  //         </button>
+          //   <button className="px-4 py-1 border-2 border-gray-500 text-black text-sm"
+          //   style={{ 
+          //     backgroundColor: '#ece9d8' 
+          //   }}>
+          //     No
+          // </button>
+        return (  //so at some point the insert button on the popup should trigger a response from backend, which will in turn get into this textbox  
     // <div className="fixed top-1/2 right-6 -translate-y-1/2  w-96  style={{zIndex: 9999}}z-50">
     <div
       ref={containerRef}
@@ -159,6 +184,7 @@ export default function App() {
             display: 'block',
             backgroundColor: 'transparent',
           }}
+          onClick={handlePetClick}
         />
       </div>
     </div>

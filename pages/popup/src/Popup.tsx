@@ -23,7 +23,7 @@ function readPromptBoxGemini() {  //returns contents of the gemini promptbox str
 const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
-  const defaultPrompt = "sample cat prompt with suggestion to make it better";
+  const defaultPrompt = "useless chud";  //aparently useless :shrug:
 
   const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
