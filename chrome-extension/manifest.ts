@@ -70,7 +70,7 @@ const manifest = {
     },
     {
       matches: ['<all_urls>'],
-      js: ['content/testprints.iife.js'],
+      js: ['content/scraping_gemini.iife.js'],
     },
   ],
   devtools_page: 'devtools/index.html',

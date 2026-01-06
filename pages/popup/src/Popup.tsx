@@ -76,7 +76,6 @@ const Popup = () => {
             }
           
           setReadStatus(`content succesfuly read (${readContent.length}) chars`)
-          // chrome.tabs.sendMessage(chrome.tabs.query({active}))
         } else if (readContent === "") {
           setPromptArea(defaultPrompt);
           setReadStatus('DOM element found, but content was empty (""). Using default prompt.');
@@ -107,11 +106,11 @@ const Popup = () => {
       .executeScript({
         target: { tabId: tab.id! },
         files: [  // theres no order of these, not strict and for thus 
+          '/content/scraping_gemini.iife.js',
+          '/content-runtime/callLLM.iife.js', //  this is what calls the LLM, and sends the prompt, and receives the new
           '/content-runtime/catHelper.iife.js', // this is the element that gets injected on top, but may change?
           //i feel like maybe injecting it directly on the prompt box is a bit invasive but may be best, i mean the user could tailor or 
           // straight up say no, and thus it must somewhere save the original prompt the user asked, maybe a db is necessary?
-
-          // '/content-runtime/callLLM.iife.js', //  this is what calls the LLM, and sends the prompt, and receives the new
         ],
       })
       .catch(err => {
@@ -120,6 +119,12 @@ const Popup = () => {
           chrome.notifications.create('inject-error', notificationOptions);
         }
       });
+  };
+  // create a new tab and scrape the query, then send it back
+  const newTabQuery = async (query: string) => {
+    await chrome.tabs.create({
+      url: "pitbull"
+    });
   };
 
   const sendPromptToTextArea = async (promptToSend: string) => {
