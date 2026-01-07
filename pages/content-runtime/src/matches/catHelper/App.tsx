@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, SetStateAction } from 'react';
 
 export default function App() {
   const defaultPrompt = "app func";
@@ -14,7 +14,7 @@ export default function App() {
 
   const clippyUrl = chrome.runtime.getURL('clippy.png');
 
-  const handlePromptChange = (e) =>{
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setPromptArea(e.target.value);
   };
 
@@ -23,10 +23,22 @@ export default function App() {
     console.log("let go of me you fucking chud");
   }
 
-  const callQueryServiceWorker = () => { // handle prompt
+  const callQueryServiceWorker = () => { // handle prompt scraping
     chrome.runtime.sendMessage({
       action: 'SCRAPE_OVERVIEW',
       query: "test query"
+    }, (response) => {
+      console.log("Content script: Response from background:", response);
+      if (chrome.runtime.lastError) {
+        console.log("Content Script: Error:", chrome.runtime.lastError.message);
+      } 
+    });
+  };
+
+  const callPromptServiceWorker = () => { // handle prompt
+    chrome.runtime.sendMessage({
+      action: 'NANO_OVERVIEW',
+      query: "who is alexander the great"
     }, (response) => {
       console.log("Content script: Response from background:", response);
       if (chrome.runtime.lastError) {
@@ -39,9 +51,12 @@ export default function App() {
     console.log("Yes clicked, injecting:", promptArea);
     callQueryServiceWorker();
   };
+  const handleNoClick = () => {
+    console.log("No clicked, injecting:", promptArea);
+    callPromptServiceWorker();
+  };
 
-
-  const messageHandler = useCallback((msg, sender, sendResponse) => {
+  const messageHandler = useCallback((msg: { action: string; dataToSend: SetStateAction<string>; }, sender: any, sendResponse: (arg0: { status: string; received: boolean; }) => void) => {
       if (msg.action === 'USER_PROMPT') {
           console.log("Content Script received message with new prompt:", msg.dataToSend);        
           setPromptArea(msg.dataToSend);
@@ -53,8 +68,8 @@ export default function App() {
   useEffect(() => {
     const interval = setInterval(() => {
       setPetPosition(prev => {
-        const containerWidth = containerRef.current?.offsetWidth || 400;
-        const containerHeight = containerRef.current?.offsetHeight || 300;
+        // const containerWidth = containerRef.current?.offsetWidth || 400;
+        // const containerHeight = containerRef.current?.offsetHeight || 300;
 
         const minX = 180;
         const maxX = window.innerWidth;
@@ -134,7 +149,8 @@ export default function App() {
           <button className="px-4 py-1 border-2 border-gray-500 text-black text-sm"
             style={{ 
               backgroundColor: '#ece9d8' 
-            }}>
+            }}
+            onClick={handleNoClick}>
               No
           </button>
         </div>
