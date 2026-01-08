@@ -1,7 +1,6 @@
 import 'webextension-polyfill';
 import { exampleThemeStorage } from '@extension/storage';
 // import 'dom-chromium-ai';
-import { send } from 'vite';
 
 console.log('Chud background worker starting...'); //https://developer.chrome.com/docs/ai/get-started#user-activation
 
@@ -22,7 +21,6 @@ const initializeModel = async () => {
       },
     });
 
-    const params = await LanguageModel.params();
     // const session_init = await LanguageModel.create({
     //     temperature: params.defaultTemperature,
     //     topK: params.defaultTopK,
@@ -42,20 +40,24 @@ const initializeModel = async () => {
       initialPrompts: [{ role: 'system', content: 'You are a helpful and friendly assistant.' }],
     });
   }
-}
+};
 initializeModel();
 
 exampleThemeStorage.get().then(theme => {
   console.log('theme', theme);
 });
 chrome.runtime.onMessage.addListener(
-  (message: { action: string; query: string }, _sender, sendResponse: (response?: any) => void) => {
+  (
+    message: { action: string; query: string },
+    _sender,
+    sendResponse: (response?: { success: boolean; answer?: string }) => void,
+  ) => {
     console.log('adding listener');
     if (message.action === 'SCRAPE_OVERVIEW') {
       console.log('Background scrape_overview: service worker got called', message.query);
       //need to replace the whitespace with +
       try {
-        let query_modified: string = message.query.replaceAll(' ', '+');
+        const query_modified: string = message.query.replaceAll(' ', '+');
         const url: string = `https://www.google.com/search?q=${query_modified}+gemini+overview`;
         chrome.tabs.create({
           url: url,
@@ -76,10 +78,14 @@ chrome.runtime.onMessage.addListener(
         return false;
       }
     }
+    return false;
   },
 );
 
-async function handleUserPrompt(user_prompt: string, sendResponse: (response?: any) => void): Promise<void> {
+const handleUserPrompt = async (
+  user_prompt: string,
+  sendResponse: (response?: { success: boolean; answer?: string }) => void,
+): Promise<void> => {
   if (availability === 'available') {
     const result = await session?.prompt(user_prompt);
     sendResponse({
@@ -88,4 +94,4 @@ async function handleUserPrompt(user_prompt: string, sendResponse: (response?: a
     });
   }
   return Promise.resolve();
-}
+};

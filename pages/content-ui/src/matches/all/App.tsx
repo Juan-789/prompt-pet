@@ -1,5 +1,3 @@
-import { t } from '@extension/i18n';
-import { ToggleButton } from '@extension/ui';
 import { useEffect } from 'react';
 
 export default function App() {
@@ -7,8 +5,5 @@ export default function App() {
     console.log('[CEB] Content ui all loaded');
   }, []);
 
-  return (
-    <div>
-    </div>
-  );
+  return <div></div>;
 }
