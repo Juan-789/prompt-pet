@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 
 export default function App() {
-  const defaultPrompt = 'app func';
+  const placeHolder = 'input your slop king, imma kirkify ts';
 
-  const [promptArea, setPromptArea] = useState(defaultPrompt);
+  const [promptArea, setPromptArea] = useState('');
+
   const [petPosition, setPetPosition] = useState({
     x: window.innerWidth - 200,
     y: (window.innerHeight - 200) / 2,
@@ -149,6 +150,7 @@ export default function App() {
           className="min-h-32 w-full resize-none rounded-md border-black bg-white p-3 text-black focus:outline-none focus:ring-2 focus:ring-teal-400"
           value={promptArea}
           onChange={handlePromptChange}
+          placeholder={placeHolder}
         />
         <div className="flex justify-center gap-2">
           <button
