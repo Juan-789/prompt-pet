@@ -24,6 +24,7 @@ const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   // const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
   // const defaultPrompt = 'useless chud'; //aparently useless :shrug:
+  //
 
   // const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
@@ -152,7 +153,7 @@ const Popup = () => {
   };
 
   return (
-    <div className={cn('App px-6 py-1', themed.bg)}>
+    <div className={cn('App relative min-h-screen px-6 py-1', themed.bg)}>
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-70"
         style={{
