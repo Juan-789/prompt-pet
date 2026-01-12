@@ -175,7 +175,6 @@ export default function App() {
         width: 'fit-content',
         left: `${petPosition.x}px`,
         top: `${petPosition.y}px`,
-        transition: 'left 0.05s linear, top 0.05s linear',
       }}>
       <div className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg">
         <textarea
