@@ -9,7 +9,7 @@ const notificationOptions = {
   type: 'basic',
   iconUrl: chrome.runtime.getURL('icon-34.png'),
   title: 'Injecting content script error',
-  message: 'You cannot inject script here!',
+  message: 'You cannot inject script here! Hint: Try the gemini page',
 } as const;
 
 const readPromptBoxGemini = () => {
@@ -24,11 +24,21 @@ const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   // const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
   // const defaultPrompt = 'useless chud'; //aparently useless :shrug:
+  //
 
   // const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
 
   // const [_promptArea, setPromptArea] = useState(defaultPrompt);
   // const [_readStatus, setReadStatus] = useState('Initializing...');
+
+  const themed = {
+    bg: isLight ? 'bg-slate-50' : 'bg-gray-800',
+    text: isLight ? 'text-gray-900' : 'text-gray-100',
+    button: cn(
+      'mt-4 rounded px-4 py-1 font-bold shadow hover:scale-105',
+      isLight ? 'bg-blue-200 text-black' : 'bg-gray-700 text-white',
+    ),
+  };
 
   const scrapingScripts = async () => {
     //this should be like sub-script? idk what to call it but the name is descriptive ig
@@ -143,33 +153,60 @@ const Popup = () => {
   };
 
   return (
-    <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
-      <header className={cn('App-header', isLight ? 'text-gray-900' : 'text-gray-100')}>
-        <button
-          className={cn(
-            'mt-4 rounded px-4 py-1 font-bold shadow hover:scale-105',
-            isLight ? 'bg-blue-200 text-black' : 'bg-gray-700 text-white',
-          )}
-          onClick={getAll3exec}>
-          {/* // onClick={injectContentScript}> */}
-          {t('callPet')}
-        </button>
-        <ToggleButton>{t('toggleTheme')}</ToggleButton>
-        <button
-          className={cn(
-            'mt-4 rounded px-4 py-1 font-bold shadow hover:scale-105',
-            isLight ? 'bg-blue-200 text-black' : 'bg-gray-700 text-white',
-          )}
-          // onClick={scrapingScripts}
-        >
-          scrape the chat box
-        </button>
-        <button
-        // onClick={sendPromptToTextArea}
-        >
-          Send to textarea
-        </button>
-      </header>
+    <div className={cn('App relative min-h-screen px-6 py-1', themed.bg)}>
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-70"
+        style={{
+          backgroundImage: `url(${chrome.runtime.getURL('Transparent_Flowers.png')})`,
+          //backgroundColor: 'rgba(255, 0, 0, 0.3)', // temporary red tint
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      />
+
+      <div className="relative z-10">
+        <header className={cn('App-header px-2.5', themed.text)}>
+          <div className="buttonsContainer flex gap-4">
+            <button className={cn('App-button', themed.button)} onClick={getAll3exec}>
+              {/* // onClick={injectContentScript}> */}
+
+              {t('callPet')}
+            </button>
+
+            <ToggleButton className={cn('App-button', themed.button)}>{t('toggleTheme')}</ToggleButton>
+          </div>
+
+          <button
+            className={cn('App-button', themed.button)}
+            // onClick={scrapingScripts}
+          >
+            scrape the chat box
+          </button>
+
+          <button
+            className={cn('App-button', themed.button)}
+            // onClick={sendPromptToTextArea}
+          >
+            Send to textarea
+          </button>
+        </header>
+
+        <div className={cn('App-body', themed.text)}>
+          <p> testing... </p>
+
+          <p> \n testing again</p>
+
+          <p> fill the whole box, i musttttt </p>
+
+          <p> once more </p>
+        </div>
+
+        <footer className={cn('App-footer', themed.text)}>
+          <p>Prompt Pet v0.1.0</p>
+          <p>by keena and juan</p>
+        </footer>
+      </div>
     </div>
   );
 };

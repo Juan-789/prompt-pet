@@ -11,9 +11,10 @@ interface Position {
 // }
 
 export default function App() {
-  const defaultPrompt = 'app func';
+  const placeHolder = 'input your slop king, imma kirkify ts';
 
-  const [promptArea, setPromptArea] = useState(defaultPrompt);
+  const [promptArea, setPromptArea] = useState('');
+
   const [petPosition, setPetPosition] = useState({
     x: window.innerWidth - 200,
     y: (window.innerHeight - 200) / 2,
@@ -174,7 +175,35 @@ export default function App() {
         width: 'fit-content',
         left: `${petPosition.x}px`,
         top: `${petPosition.y}px`,
+        transition: 'left 0.05s linear, top 0.05s linear',
       }}>
+      <div className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg">
+        <textarea
+          className="min-h-32 w-full resize-none rounded-md border-black bg-white p-3 text-black focus:outline-none focus:ring-2 focus:ring-teal-400"
+          value={promptArea}
+          onChange={handlePromptChange}
+          placeholder={placeHolder}
+        />
+        <div className="flex justify-center gap-2">
+          <button
+            className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
+            style={{
+              backgroundColor: '#ece9d8',
+            }}
+            onClick={handleYesClick} //send the prompt to the actual main textbox
+          >
+            Yes
+          </button>
+          <button
+            className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
+            style={{
+              backgroundColor: '#ece9d8',
+            }}
+            onClick={handleNoClick}>
+            No
+          </button>
+        </div>
+      </div>
       <div
         style={{
           backgroundColor: 'transparent',
