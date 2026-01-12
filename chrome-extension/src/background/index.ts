@@ -9,7 +9,7 @@ let session: LanguageModel | null = null;
 
 const initializeModel = async () => {
   availability = await LanguageModel.availability();
-  if (availability === 'unavailable') {
+  if (availability === 'downloadable') {
     //NOTE: If the available storage space falls to less than 10 GB
     //  after the download, the model is removed from your device. The model redownloads once the requirements are met.
     session = await LanguageModel.create({
