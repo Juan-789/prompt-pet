@@ -76,8 +76,20 @@ const manifest = {
   devtools_page: 'devtools/index.html',
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
-      matches: ['*://*/*'],
+      resources: [
+        '*.js',
+        '*.css',
+        '*.svg',
+        'icon-128.png',
+        'icon-34.png',
+        'clippy.png',
+        'Transparent_Flowers.png',
+        'up.png',
+        'down.jpg',
+        'left.jpg',
+        'right.png',
+      ],
+      matches: ['<all_urls>'],
     },
   ],
   side_panel: {
