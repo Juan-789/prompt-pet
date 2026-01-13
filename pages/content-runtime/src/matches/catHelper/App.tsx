@@ -4,17 +4,13 @@ interface Position {
   x: number;
   y: number;
 }
-
-// interface Velocity {
-//   x: number;
-//   y: number;
-// }
+type PetDirection = 'IDLE' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN';
 
 export default function App() {
   const placeHolder = 'input your slop king, imma kirkify ts';
 
   const [promptArea, setPromptArea] = useState('');
-
+  const [petDirection, setPetDirection] = useState<PetDirection>('IDLE');
   const [petPosition, setPetPosition] = useState({
     x: window.innerWidth - 200,
     y: (window.innerHeight - 200) / 2,
@@ -24,13 +20,32 @@ export default function App() {
   // const velocityRef = useRef<Velocity>({ x: 0, y: 0 });
   const detectionRadius: number = 150;
   const chaseSpeed: number = 3;
-  const clippyUrl = chrome.runtime.getURL('clippy.png');
+  const clippyUrl = `${chrome.runtime.getURL('clippy.png')}`;
+  const up_sprite = `${chrome.runtime.getURL('up.png')}`;
+  const down_sprite = `${chrome.runtime.getURL('down.jpg')}`;
+  const left_sprite = `${chrome.runtime.getURL('left.jpg')}`;
+  const right_sprite = `${chrome.runtime.getURL('right.png')}`;
   const mousePos = useRef<Position>({ x: 0, y: 0 });
   const petSize: number = 80;
 
-  // useEffect(() => {
+  // useEffect(() => {1
   //   velocityRef.current = velocity;
   // }, [velocity]);
+
+  const getCurrentSprite = () => {
+    switch (petDirection) {
+      case 'RIGHT':
+        return right_sprite;
+      case 'LEFT':
+        return left_sprite;
+      case 'UP':
+        return up_sprite;
+      case 'DOWN':
+        return down_sprite;
+      case 'IDLE':
+        return clippyUrl;
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent): void => {
@@ -137,6 +152,30 @@ export default function App() {
           const directionX: number = dx / distance;
           const directionY: number = dy / distance;
 
+          // Determine direction based on movement
+          const absDx = Math.abs(directionX);
+          const absDy = Math.abs(directionY);
+          if (absDx > absDy) {
+            // Horizontal movement is dominant
+            setPetDirection(directionX > 0 ? 'RIGHT' : 'LEFT');
+          } else {
+            // Vertical movement is dominant
+            setPetDirection(directionY > 0 ? 'DOWN' : 'UP');
+          }
+          // if (dx>dy){
+          //   if (dx>0){
+          //     setPetDirection('RIGHT')
+          //   } else {
+          //     setPetDirection('LEFT')
+          //   }
+          // } else if (dy>dx) {
+          //     if (dy>0){
+          //       setPetDirection('UP')
+          //     } else {
+          //       setPetDirection('DOWN')
+          //     }
+          // }
+
           newX = prev.x + directionX * chaseSpeed;
           newY = prev.y + directionY * chaseSpeed;
 
@@ -175,11 +214,14 @@ export default function App() {
         width: 'fit-content',
         left: `${petPosition.x}px`,
         top: `${petPosition.y}px`,
+        minWidth: 'max-content',
+        flexShrink: 0,
       }}>
       <div
         style={{
           backgroundColor: 'transparent',
           marginBottom: '8px',
+          flexShrink: 0,
         }}>
         <button
           type="button"
@@ -190,7 +232,7 @@ export default function App() {
           }}
           aria-label="Click Clippy the pet">
           <img
-            src={clippyUrl}
+            src={getCurrentSprite()}
             alt="Clippy, (your pet)"
             className="h-10 w-10 object-contain"
             style={{
@@ -199,11 +241,17 @@ export default function App() {
               objectFit: 'contain',
               display: 'block',
               backgroundColor: 'transparent',
+              flexShrink: 0,
             }}
           />
         </button>
       </div>
-      <div className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg">
+      <div
+        className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg"
+        style={{
+          minWidth: '300px', // Set a minimum width for the textarea box
+          flexShrink: 0, // Don't allow it to shrink
+        }}>
         <textarea
           className="min-h-32 w-full resize-none rounded-md border-black bg-white p-3 text-black focus:outline-none focus:ring-2 focus:ring-teal-400"
           value={promptArea}
