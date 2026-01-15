@@ -4,8 +4,22 @@ interface Position {
   x: number;
   y: number;
 }
-type PetDirection = 'IDLE' | 'LEFT' | 'RIGHT' | 'UP' | 'DOWN';
-
+type PetDirection =
+  | 'IDLE'
+  | 'ALERT'
+  | 'SCRATCH'
+  | 'TIRED'
+  | 'SLEEPING'
+  | 'N'
+  | 'NE'
+  | 'E'
+  | 'SE'
+  | 'S'
+  | 'SW'
+  | 'W'
+  | 'NW';
+// const SPRITE_SIZE = 32; // The source pixel size of oneko
+const DISPLAY_SIZE = 32; // The size you want in your UI
 export default function App() {
   const placeHolder = 'input your slop king, imma kirkify ts';
 
@@ -16,35 +30,75 @@ export default function App() {
     y: (window.innerHeight - 200) / 2,
   });
   const containerRef = useRef<HTMLDivElement>(null);
+  const [frame, setFrame] = useState(0);
+
+  // Oneko Logic States
+  const [idleTime, setIdleTime] = useState(0);
+  const [idleAnimation, setIdleAnimation] = useState<string | null>(null);
+  const [idleAnimationFrame, setIdleAnimationFrame] = useState(0);
+
+  const petSpeed = 10;
   // const [velocity, setVelocity] = useState<Velocity>({ x: 0, y: 0 });
   // const velocityRef = useRef<Velocity>({ x: 0, y: 0 });
-  const detectionRadius: number = 150;
-  const chaseSpeed: number = 3;
-  const clippyUrl = `${chrome.runtime.getURL('clippy.png')}`;
-  const up_sprite = `${chrome.runtime.getURL('up.png')}`;
-  const down_sprite = `${chrome.runtime.getURL('down.jpg')}`;
-  const left_sprite = `${chrome.runtime.getURL('left.jpg')}`;
-  const right_sprite = `${chrome.runtime.getURL('right.png')}`;
+  // const detectionRadius: number = 150;
+  // const chaseSpeed: number = 3;
+  // const clippyUrl = `${chrome.runtime.getURL('clippy.png')}`;
+  // const up_sprite = `${chrome.runtime.getURL('up.png')}`;
+  // const down_sprite = `${chrome.runtime.getURL('down.jpg')}`;
+  // const left_sprite = `${chrome.runtime.getURL('left.jpg')}`;
+  // const right_sprite = `${chrome.runtime.getURL('right.png')}`;
   const mousePos = useRef<Position>({ x: 0, y: 0 });
-  const petSize: number = 80;
+  // const petSize: number = 80;
 
   // useEffect(() => {1
   //   velocityRef.current = velocity;
   // }, [velocity]);
-
-  const getCurrentSprite = () => {
-    switch (petDirection) {
-      case 'RIGHT':
-        return right_sprite;
-      case 'LEFT':
-        return left_sprite;
-      case 'UP':
-        return up_sprite;
-      case 'DOWN':
-        return down_sprite;
-      case 'IDLE':
-        return clippyUrl;
-    }
+  // The coordinate map from your oneko script
+  const spriteSets: Record<string, number[][]> = {
+    idle: [[-3, -3]],
+    alert: [[-7, -3]],
+    scratch: [
+      [-5, 0],
+      [-6, 0],
+      [-7, 0],
+    ],
+    tired: [[-3, -2]],
+    sleeping: [
+      [-2, 0],
+      [-2, -1],
+    ],
+    N: [
+      [-1, -2],
+      [-1, -3],
+    ],
+    NE: [
+      [0, -2],
+      [0, -3],
+    ],
+    E: [
+      [-3, 0],
+      [-3, -1],
+    ],
+    SE: [
+      [-5, -1],
+      [-5, -2],
+    ],
+    S: [
+      [-6, -3],
+      [-7, -2],
+    ],
+    SW: [
+      [-5, -3],
+      [-6, -1],
+    ],
+    W: [
+      [-4, -2],
+      [-4, -3],
+    ],
+    NW: [
+      [-1, 0],
+      [-1, -1],
+    ],
   };
 
   useEffect(() => {
@@ -125,75 +179,71 @@ export default function App() {
 
   // Movement and collision detection in ONE place
   useEffect(() => {
-    const interval: NodeJS.Timeout = setInterval(() => {
-      setPetPosition((prev: Position): Position => {
-        const minX: number = 180;
-        const maxX: number = window.innerWidth - 200;
-        const minY: number = 0;
-        const maxY: number = window.innerHeight - 200;
+    const interval = setInterval(() => {
+      setFrame(f => f + 1);
 
-        const mouseX: number = mousePos.current.x;
-        const mouseY: number = mousePos.current.y;
+      const diffX = petPosition.x - mousePos.current.x;
+      const diffY = petPosition.y - mousePos.current.y;
+      const distance = Math.sqrt(diffX ** 2 + diffY ** 2);
 
-        const petCenterX: number = prev.x + petSize / 2 - 200;
-        const petCenterY: number = prev.y + petSize / 2;
+      // 1. IDLE LOGIC
+      if (distance < petSpeed || distance < 48) {
+        setIdleTime(prev => prev + 1);
 
-        // Calculate distance from pet to mouse
-        const dx: number = mouseX - petCenterX;
-        const dy: number = mouseY - petCenterY;
-        const distance: number = Math.sqrt(dx * dx + dy * dy);
-
-        let newX: number = prev.x;
-        let newY: number = prev.y;
-
-        // If mouse is within detection radius, chase it!
-        if (distance < detectionRadius && distance > 5) {
-          // Normalize direction vector and scale by chase speed
-          const directionX: number = dx / distance;
-          const directionY: number = dy / distance;
-
-          // Determine direction based on movement
-          const absDx = Math.abs(directionX);
-          const absDy = Math.abs(directionY);
-          if (absDx > absDy) {
-            // Horizontal movement is dominant
-            setPetDirection(directionX > 0 ? 'RIGHT' : 'LEFT');
-          } else {
-            // Vertical movement is dominant
-            setPetDirection(directionY > 0 ? 'DOWN' : 'UP');
-          }
-          // if (dx>dy){
-          //   if (dx>0){
-          //     setPetDirection('RIGHT')
-          //   } else {
-          //     setPetDirection('LEFT')
-          //   }
-          // } else if (dy>dx) {
-          //     if (dy>0){
-          //       setPetDirection('UP')
-          //     } else {
-          //       setPetDirection('DOWN')
-          //     }
-          // }
-
-          newX = prev.x + directionX * chaseSpeed;
-          newY = prev.y + directionY * chaseSpeed;
-
-          console.log(`CHASING! Distance: ${distance.toFixed(0)}px, Moving towards (${mouseX}, ${mouseY})`);
-        } else if (distance >= detectionRadius) {
-          console.log(`Too far: ${distance.toFixed(0)}px`);
+        // Randomly start an idle animation (scratch or sleep)
+        if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && !idleAnimation) {
+          setIdleAnimation(Math.random() > 0.5 ? 'SLEEPING' : 'SCRATCH');
         }
 
-        // Clamp to boundaries
-        newX = Math.max(minX, Math.min(maxX, newX));
-        newY = Math.max(minY, Math.min(maxY, newY));
+        if (idleAnimation === 'SLEEPING') {
+          if (idleAnimationFrame < 8) setPetDirection('TIRED');
+          else setPetDirection('SLEEPING');
 
-        return { x: newX, y: newY };
-      });
-    }, 50);
+          if (idleAnimationFrame > 192) {
+            setIdleAnimation(null);
+            setIdleAnimationFrame(0);
+          } else setIdleAnimationFrame(prev => prev + 1);
+        } else if (idleAnimation === 'SCRATCH') {
+          setPetDirection('SCRATCH');
+          if (idleAnimationFrame > 9) {
+            setIdleAnimation(null);
+            setIdleAnimationFrame(0);
+          } else setIdleAnimationFrame(prev => prev + 1);
+        } else {
+          setPetDirection('IDLE');
+        }
+        return;
+      }
 
-    return (): void => clearInterval(interval);
-  }, []); // No dependencies - runs once and uses refs for everything
+      // 2. MOVING LOGIC
+      setIdleAnimation(null);
+      setIdleAnimationFrame(0);
+
+      // Alert state before running
+      if (idleTime > 1) {
+        setPetDirection('ALERT');
+        setIdleTime(prev => Math.min(prev, 7) - 1);
+        return;
+      }
+
+      // Determine Direction String (N, NE, S, etc.)
+      let dir = '';
+      if (diffY / distance > 0.5) dir = 'N';
+      else if (diffY / distance < -0.5) dir = 'S';
+
+      if (diffX / distance > 0.5) dir += 'W';
+      else if (diffX / distance < -0.5) dir += 'E';
+
+      setPetDirection((dir || 'S') as PetDirection);
+
+      // Update Position
+      setPetPosition(prev => ({
+        x: prev.x - (diffX / distance) * petSpeed,
+        y: prev.y - (diffY / distance) * petSpeed,
+      }));
+    }, 100); // 100ms matches original oneko speed
+    return () => clearInterval(interval);
+  }, [petPosition, idleTime, idleAnimation, idleAnimationFrame]);
 
   useEffect(() => {
     chrome.runtime.onMessage.addListener(messageHandler);
@@ -201,6 +251,12 @@ export default function App() {
       chrome.runtime.onMessage.removeListener(messageHandler);
     };
   }, [messageHandler]);
+  // Helper to calculate background position
+  const getBackgroundPos = () => {
+    const set = spriteSets[petDirection] || spriteSets['idle'];
+    const currentSprite = set[frame % set.length];
+    return `${currentSprite[0] * DISPLAY_SIZE}px ${currentSprite[1] * DISPLAY_SIZE}px`;
+  };
 
   return (
     <div
@@ -217,35 +273,31 @@ export default function App() {
         minWidth: 'max-content',
         flexShrink: 0,
       }}>
-      <div
+      <button
+        type="button"
+        onClick={() => handlePetClick()}
+        onKeyDown={e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            setPromptArea('let go of me you fucking chud');
+          }
+        }}
         style={{
-          backgroundColor: 'transparent',
+          // Reset default button styles
+          padding: 0,
+          border: 'none',
+          background: 'none',
+          outline: 'none',
+
+          width: `${DISPLAY_SIZE}px`,
+          height: `${DISPLAY_SIZE}px`,
+          backgroundImage: `url(${chrome.runtime.getURL('oneko.gif')})`,
+          backgroundPosition: getBackgroundPos(),
+          backgroundSize: `${DISPLAY_SIZE * 8}px ${DISPLAY_SIZE * 4}px`, // Oneko sheet is 8x4 sprites
+          imageRendering: 'pixelated',
+          cursor: 'pointer',
           marginBottom: '8px',
-          flexShrink: 0,
-        }}>
-        <button
-          type="button"
-          onClick={handlePetClick}
-          className="cursor-pointer border-0 bg-transparent p-0"
-          style={{
-            marginBottom: '8px',
-          }}
-          aria-label="Click Clippy the pet">
-          <img
-            src={getCurrentSprite()}
-            alt="Clippy, (your pet)"
-            className="h-10 w-10 object-contain"
-            style={{
-              width: '80px',
-              height: '80px',
-              objectFit: 'contain',
-              display: 'block',
-              backgroundColor: 'transparent',
-              flexShrink: 0,
-            }}
-          />
-        </button>
-      </div>
+        }}
+      />
       <div
         className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg"
         style={{

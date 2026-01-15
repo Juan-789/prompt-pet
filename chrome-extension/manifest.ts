@@ -88,6 +88,7 @@ const manifest = {
         'down.jpg',
         'left.jpg',
         'right.png',
+        'oneko.gif',
       ],
       matches: ['<all_urls>'],
     },
