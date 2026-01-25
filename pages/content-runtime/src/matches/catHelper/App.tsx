@@ -174,24 +174,24 @@ export default function App() {
 
       // 1. IDLE LOGIC
       if (distance < petSpeed || distance < 48) {
-        console.log('idle logic');
+        // console.log('idle logic');
         setIdleTime(prev => prev + 1);
 
         // Randomly start an idle animation (scratch or sleep)
         if (idleTime > 10 && !idleAnimation) {
-          console.log('inside the random start');
+          // console.log('inside the random start');
           // if (Math.random() < 0.2) {
-          // setIdleAnimation(Math.random() > 0.5 ? 'SLEEPING' : 'SCRATCH');
+          setIdleAnimation(Math.random() > 0.5 ? 'SLEEPING' : 'SCRATCH');
           // }
-          setIdleAnimation('SLEEPING');
+          // setIdleAnimation('SLEEPING');
         }
 
         if (idleAnimation === 'SLEEPING') {
           if (idleAnimationFrame < 8) {
-            console.log('tired');
+            // console.log('tired');
             setPetDirection('TIRED');
           } else {
-            console.log('sleeping');
+            // console.log('sleeping');
             setPetDirection('SLEEPING');
           }
 
@@ -217,7 +217,7 @@ export default function App() {
 
       // Alert state before running
       if (idleTime > 0) {
-        console.log('alert');
+        // console.log('alert');
         setPetDirection('ALERT');
         setIdleTime(prev => Math.min(prev, 7) - 1);
         return;
