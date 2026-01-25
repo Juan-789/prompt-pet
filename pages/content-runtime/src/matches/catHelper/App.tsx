@@ -22,7 +22,7 @@ type PetDirection =
 const DISPLAY_SIZE = 32; // The size you want in your UI
 export default function App() {
   const placeHolder = 'input your slop king, imma kirkify ts';
-
+  const [showTextArea, setShowTextArea] = useState(true);
   const [promptArea, setPromptArea] = useState('');
   const [petDirection, setPetDirection] = useState<PetDirection>('IDLE');
   const [petPosition, setPetPosition] = useState({
@@ -38,32 +38,17 @@ export default function App() {
   const [idleAnimationFrame, setIdleAnimationFrame] = useState(0);
 
   const petSpeed = 10;
-  // const [velocity, setVelocity] = useState<Velocity>({ x: 0, y: 0 });
-  // const velocityRef = useRef<Velocity>({ x: 0, y: 0 });
-  // const detectionRadius: number = 150;
-  // const chaseSpeed: number = 3;
-  // const clippyUrl = `${chrome.runtime.getURL('clippy.png')}`;
-  // const up_sprite = `${chrome.runtime.getURL('up.png')}`;
-  // const down_sprite = `${chrome.runtime.getURL('down.jpg')}`;
-  // const left_sprite = `${chrome.runtime.getURL('left.jpg')}`;
-  // const right_sprite = `${chrome.runtime.getURL('right.png')}`;
   const mousePos = useRef<Position>({ x: 0, y: 0 });
-  // const petSize: number = 80;
-
-  // useEffect(() => {1
-  //   velocityRef.current = velocity;
-  // }, [velocity]);
-  // The coordinate map from your oneko script
   const spriteSets: Record<string, number[][]> = {
-    idle: [[-3, -3]],
-    alert: [[-7, -3]],
-    scratch: [
+    IDLE: [[-3, -3]],
+    ALERT: [[-7, -3]],
+    SCRATCH: [
       [-5, 0],
       [-6, 0],
       [-7, 0],
     ],
-    tired: [[-3, -2]],
-    sleeping: [
+    TIRED: [[-3, -2]],
+    SLEEPING: [
       [-2, 0],
       [-2, -1],
     ],
@@ -117,6 +102,7 @@ export default function App() {
 
   const handlePetClick = () => {
     setPromptArea('let go of me you fucking chud');
+    setShowTextArea(!showTextArea);
     console.log('let go of me you fucking chud');
   };
 
@@ -188,20 +174,30 @@ export default function App() {
 
       // 1. IDLE LOGIC
       if (distance < petSpeed || distance < 48) {
+        console.log('idle logic');
         setIdleTime(prev => prev + 1);
 
         // Randomly start an idle animation (scratch or sleep)
-        if (idleTime > 10 && Math.floor(Math.random() * 200) === 0 && !idleAnimation) {
-          setIdleAnimation(Math.random() > 0.5 ? 'SLEEPING' : 'SCRATCH');
+        if (idleTime > 10 && !idleAnimation) {
+          console.log('inside the random start');
+          // if (Math.random() < 0.2) {
+          // setIdleAnimation(Math.random() > 0.5 ? 'SLEEPING' : 'SCRATCH');
+          // }
+          setIdleAnimation('SLEEPING');
         }
 
         if (idleAnimation === 'SLEEPING') {
-          if (idleAnimationFrame < 8) setPetDirection('TIRED');
-          else setPetDirection('SLEEPING');
+          if (idleAnimationFrame < 8) {
+            console.log('tired');
+            setPetDirection('TIRED');
+          } else {
+            console.log('sleeping');
+            setPetDirection('SLEEPING');
+          }
 
           if (idleAnimationFrame > 192) {
-            setIdleAnimation(null);
-            setIdleAnimationFrame(0);
+            setIdleAnimation(null); //????
+            setIdleAnimationFrame(0); // ???
           } else setIdleAnimationFrame(prev => prev + 1);
         } else if (idleAnimation === 'SCRATCH') {
           setPetDirection('SCRATCH');
@@ -220,7 +216,8 @@ export default function App() {
       setIdleAnimationFrame(0);
 
       // Alert state before running
-      if (idleTime > 1) {
+      if (idleTime > 0) {
+        console.log('alert');
         setPetDirection('ALERT');
         setIdleTime(prev => Math.min(prev, 7) - 1);
         return;
@@ -253,7 +250,8 @@ export default function App() {
   }, [messageHandler]);
   // Helper to calculate background position
   const getBackgroundPos = () => {
-    const set = spriteSets[petDirection] || spriteSets['idle'];
+    const set = spriteSets[petDirection] || spriteSets['IDLE'];
+
     const currentSprite = set[frame % set.length];
     return `${currentSprite[0] * DISPLAY_SIZE}px ${currentSprite[1] * DISPLAY_SIZE}px`;
   };
@@ -298,38 +296,40 @@ export default function App() {
           marginBottom: '8px',
         }}
       />
-      <div
-        className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-300 bg-transparent p-4 shadow-lg"
-        style={{
-          minWidth: '300px', // Set a minimum width for the textarea box
-          flexShrink: 0, // Don't allow it to shrink
-        }}>
-        <textarea
-          className="min-h-32 w-full resize-none rounded-md border-black bg-white p-3 text-black focus:outline-none focus:ring-2 focus:ring-teal-400"
-          value={promptArea}
-          onChange={handlePromptChange}
-          placeholder={placeHolder}
-        />
-        <div className="flex justify-center gap-2">
-          <button
-            className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
-            style={{
-              backgroundColor: '#ece9d8',
-            }}
-            onClick={handleYesClick} //send the prompt to the actual main textbox
-          >
-            Yes
-          </button>
-          <button
-            className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
-            style={{
-              backgroundColor: '#ece9d8',
-            }}
-            onClick={handleNoClick}>
-            No
-          </button>
+      {showTextArea && (
+        <div
+          className="flex flex-col gap-3 rounded-3xl rounded-lg border border-gray-100 bg-transparent p-4 shadow-lg"
+          style={{
+            minWidth: '100px', // Set a minimum width for the textarea box
+            flexShrink: 0, // Don't allow it to shrink
+          }}>
+          <textarea
+            className="min-h-32 w-full resize-none rounded-md border-black bg-white p-3 text-black focus:outline-none focus:ring-2 focus:ring-teal-400"
+            value={promptArea}
+            onChange={handlePromptChange}
+            placeholder={placeHolder}
+          />
+          <div className="flex justify-center gap-2">
+            <button
+              className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
+              style={{
+                backgroundColor: '#ece9d8',
+              }}
+              onClick={handleYesClick} //send the prompt to the actual main textbox
+            >
+              Yes
+            </button>
+            <button
+              className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
+              style={{
+                backgroundColor: '#ece9d8',
+              }}
+              onClick={handleNoClick}>
+              No
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
