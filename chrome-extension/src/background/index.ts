@@ -9,7 +9,9 @@ let session: LanguageModel | null = null;
 
 const initializeModel = async () => {
   availability = await LanguageModel.availability();
+  console.log(availability);
   if (availability === 'downloadable') {
+    // console.log('downloadable');
     //NOTE: If the available storage space falls to less than 10 GB
     //  after the download, the model is removed from your device. The model redownloads once the requirements are met.
     session = await LanguageModel.create({
@@ -37,7 +39,13 @@ const initializeModel = async () => {
   } else if (availability === 'available') {
     session = await LanguageModel.create({
       //initial context
-      initialPrompts: [{ role: 'system', content: 'You are a helpful and friendly assistant.' }],
+      initialPrompts: [
+        {
+          role: 'system',
+          content:
+            "You are a senior prompt engineer helping a user who only types short, casual requests. Your job is to tranform the user's short request plus some context into a kStringMaxLength, expert-level prompt for another llm",
+        },
+      ],
     });
   }
 };
@@ -86,12 +94,25 @@ const handleUserPrompt = async (
   user_prompt: string,
   sendResponse: (response?: { success: boolean; answer?: string }) => void,
 ): Promise<void> => {
-  if (availability === 'available') {
-    const result = await session?.prompt(user_prompt);
+  try {
+    if (availability === 'available' && session) {
+      const result = await session?.prompt(user_prompt);
+      sendResponse({
+        success: true,
+        answer: result,
+      });
+    } else {
+      sendResponse({
+        success: false,
+        answer: 'AI not available',
+      });
+    }
+  } catch (e) {
+    console.error('Error in handleUserPrompt:', e);
     sendResponse({
-      success: true,
-      answer: result,
+      success: false,
+      answer: `Error: ${e}`,
     });
+    return Promise.resolve();
   }
-  return Promise.resolve();
 };

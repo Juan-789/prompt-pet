@@ -106,21 +106,21 @@ export default function App() {
     console.log('let go of me you fucking chud');
   };
 
-  const callQueryServiceWorker = () => {
-    // handle prompt scraping
-    chrome.runtime.sendMessage(
-      {
-        action: 'SCRAPE_OVERVIEW',
-        query: 'test query',
-      },
-      response => {
-        console.log('Content script: Response from background:', response);
-        if (chrome.runtime.lastError) {
-          console.log('Content Script: Error:', chrome.runtime.lastError.message);
-        }
-      },
-    );
-  };
+  // const callQueryServiceWorker = () => {
+  //   // handle prompt scraping
+  //   chrome.runtime.sendMessage(
+  //     {
+  //       action: 'SCRAPE_OVERVIEW',
+  //       query: 'test query',
+  //     },
+  //     response => {
+  //       console.log('Content script: Response from background:', response);
+  //       if (chrome.runtime.lastError) {
+  //         console.log('Content Script: Error:', chrome.runtime.lastError.message);
+  //       }
+  //     },
+  //   );
+  // };
 
   const callPromptServiceWorker = () => {
     // handle prompt
@@ -140,7 +140,8 @@ export default function App() {
 
   const handleYesClick = () => {
     console.log('Yes clicked, injecting:', promptArea);
-    callQueryServiceWorker();
+    //this should inject the code into the textbox
+    // callQueryServiceWorker();
   };
   const handleNoClick = () => {
     console.log('No clicked, injecting:', promptArea);
@@ -317,7 +318,7 @@ export default function App() {
               }}
               onClick={handleYesClick} //send the prompt to the actual main textbox
             >
-              Yes
+              Accept Prompt
             </button>
             <button
               className="border-2 border-gray-500 px-4 py-1 text-sm text-black"
@@ -325,7 +326,7 @@ export default function App() {
                 backgroundColor: '#ece9d8',
               }}
               onClick={handleNoClick}>
-              No
+              Generate prompt
             </button>
           </div>
         </div>
