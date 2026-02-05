@@ -39,7 +39,7 @@ const manifest = {
   },
   action: {
     default_popup: 'popup/index.html',
-    default_icon: 'icon-34.png',
+    default_icon: 'pet-prompt-logo.png',
   },
   chrome_url_overrides: {
     newtab: 'new-tab/index.html',
@@ -89,6 +89,7 @@ const manifest = {
         'left.jpg',
         'right.png',
         'oneko.gif',
+        'pet-prompt-logo.png',
       ],
       matches: ['<all_urls>'],
     },
