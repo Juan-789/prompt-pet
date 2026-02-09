@@ -157,7 +157,7 @@ const Popup = () => {
       <div
         className="pointer-events-none absolute inset-0 z-0 opacity-70"
         style={{
-          backgroundImage: `url(${chrome.runtime.getURL('Transparent_Flowers.png')})`,
+          backgroundImage: `url(${chrome.runtime.getURL('Transparent_Flowers_1.png')})`,
           //backgroundColor: 'rgba(255, 0, 0, 0.3)', // temporary red tint
           backgroundSize: 'cover',
           backgroundPosition: 'center',
